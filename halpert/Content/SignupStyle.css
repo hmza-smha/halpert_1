@@ -1,0 +1,124 @@
+
+@import url('https://font.googleleapis.com/css?familly=Poppins:200,300,400,500,600,700,800,900&display=swap');
+*
+{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+font-family: 'poppins' sans-serif;
+
+}
+body
+{
+display: flex;
+height: 100vh;
+justify-content: center;
+align-items: center; 
+padding: 10px;
+background: linear-gradient(to top,#f9f6fc,  #3d0981); 
+
+}
+body .color{
+position: absolute;
+filter: blur(120px);
+}
+.container{
+max-width: 700px;
+width: 100%;
+/* background: rgb(255, 255, 255,0.25);   */
+background: rgb(255,255,255,0.25);
+border: 3px solid rgba(255,255,255,0.25);
+
+padding: 25px 30px;
+border-radius: 15px;
+}
+.container .title{
+font-size: 25px;
+font-weight: 500;
+position: relative;
+}
+.container .title::before{
+content: '';
+position: absolute;
+left: 0;
+bottom: -5px;
+height:3px ;
+width: 40px; 
+background: linear-gradient(to bottom,#3d0981, #df9712); 
+
+}
+.container form .user-details{
+display: flex;
+flex-wrap: wrap;
+justify-content: space-between;
+margin: 20px 0 12px 0;
+}
+
+form .user-details .input-Box{
+margin-bottom: 20px;  
+width: calc(100% /2 - 20px);
+
+}
+
+.user-details .input-Box .details{
+margin-bottom: 6px;
+font-weight: 500;
+display: block;
+color: rgba(0, 0, 0, 0.952);
+}
+
+.user-details .input-Box input{
+height: 45px ;
+width: 100% ;
+outline: none;
+border-radius: 7px;
+border:2px solid #ccc ;
+padding-left: 15px;
+font-size: 16px;
+border-bottom-width:2px ;
+transition: all 0.3s ease;
+
+
+}
+.user-details .input-Box input:focus,
+.user-details .input-Box:valid{
+
+border-color: #16ff70 ;
+}
+form .Rolle-details .Rolle-title{
+font-size: 20px;
+font-weight: 600;
+}
+form .Rolle-details .category{
+display:flex;
+width: 45%;
+margin:15px 0;
+justify-content: space-between;
+}
+.Rolle-details .category label{
+display:flex;
+justify-content: center;
+align-items: center;
+margin-left: 0px;
+
+}
+
+
+form .button{
+height: 45px;
+margin: 30px 0;
+
+}
+form .button input{
+height: 100%;
+width: 100%;
+color: #fff;
+border: none;
+font-size: 18px;
+font-weight:500;
+border-radius: 5px;
+background: linear-gradient(to bottom,#df9712, #df9712); 
+
+}
+
+

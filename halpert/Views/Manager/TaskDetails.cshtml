@@ -1,0 +1,182 @@
+﻿@model halpert.ViewModels.TaskDetailsVM
+
+@{
+    ViewBag.Title = "TaskDetails";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    table, th, td {
+        padding: 10px;
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+</style>
+
+
+<h2>@Model.Task.Project.Name</h2>
+<h4>@Model.Task.Name</h4>
+
+<div>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Task.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Task.Name)
+        </dd>
+
+        <br />
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Task.Details)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Task.Details)
+        </dd>
+
+        <br />
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Task.DevId)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Task.User.Email)
+        </dd>
+
+        <br />
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Task.Optimistic)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(modelItem => Model.Task.Optimistic) <i>days</i>
+        </dd>
+
+        <br />
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Task.MostLikely)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(modelItem => Model.Task.MostLikely) <i>days</i>
+        </dd>
+
+        <br />
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Task.Pessimistic)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(modelItem => Model.Task.Pessimistic) <i>days</i>
+        </dd>
+
+        <br />
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Task.Duration)
+        </dt>
+
+        <dd>
+            @if (Model.Task.Duration == 1)
+            {
+                <i>1 day (default)</i>
+            }
+            else
+            {
+                @Html.DisplayFor(modelItem => Model.Task.Duration) <i>days</i>
+            }
+        </dd>
+
+        <br />
+
+        @*<dt>
+            @Html.DisplayNameFor(model => model.Task.StartTime)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Task.StartTime)
+        </dd>
+
+        <br />*@
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Task.Progress)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Task.Progress)%
+        </dd>
+
+        <br />
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Task.Accepted)
+        </dt>
+
+        <dd>
+            @if (Model.Task.Accepted == null)
+            {
+                <i>pending</i>
+            }
+            else
+            {
+                @Html.DisplayFor(modelItem => Model.Task.Accepted)
+            }
+        </dd>
+
+        <br />
+
+        <dt>
+            Predecessor Tasks
+        </dt>
+
+        <dd>
+            @foreach (var preTask in Model.PreTasks)
+            {
+                @preTask.PreTask.Name <br />
+            }
+        </dd>
+        <br /><br />
+        <dd>
+            <table>
+                <tr>
+                    <th>Length</th>
+                    <th>Vocabulary</th>
+                    <th>Volume</th>
+                    <th>Inside the boundaries</th>
+                    <th>Difficulty</th>
+                    <th>Effort</th>
+                    <th>Time to understand</th>
+                    <th>Bugs</th>
+                </tr>
+                <tr>
+                    <td>@Model.Task.Length</td>
+                    <td>@Model.Task.Vocabulary</td>
+                    <td>@Model.Task.Volume</td>
+                    <td>@Model.Task.InsideTheBoundaries</td>
+                    <td>@Model.Task.Difficulty</td>
+                    <td>@Model.Task.Effort</td>
+                    <td>@Model.Task.TimeToUnderStand</td>
+                    <td>@Model.Task.Bugs</td>
+                </tr>
+            </table>
+        </dd>
+    </dl>
+</div>
+
+<br />
+<br />
+<br />
+
+<p>
+    <a href="/Manager/ProjectDetails/@Model.Task.ProjectId">Back</a>
+</p>
+

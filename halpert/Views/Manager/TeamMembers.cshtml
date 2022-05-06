@@ -1,0 +1,85 @@
+﻿@model halpert.ViewModels.TeamMembersVM
+
+@{
+    ViewBag.Title = "TeamMembers";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .add_container {
+        border: 1px solid black;
+        display: none;
+        padding: 5px 20px;
+    }
+</style>
+<h2>@Model.ProjectName</h2>
+<h4>Team members</h4>
+<br />
+
+<button id="add_btn" class="btn btn-success">Add member</button>
+
+@using (Html.BeginForm("AddMember", "Manager"))
+{
+    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+    <div class="add_container">
+
+        <h5>Developer Email</h5>
+        @Html.EditorFor(model => model.Email)
+        @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+        @Html.HiddenFor(m => m.ProjectId)
+        <input type="submit" value="add" class="" />
+    </div>
+}
+<br />
+<table class="table">
+
+    @if (Model.TeamMembers.Count == 0)
+    {
+        <i>This project doesn't have any member!</i>
+    }
+    else
+    {
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                Email
+            </th>
+            <th></th>
+        </tr>
+
+        foreach (var item in Model.TeamMembers)
+        {
+
+            <tr>
+                <td>
+                    @item.User.Name
+                </td>
+                <td>
+                    @item.User.Email
+                </td>
+                <td>
+                    @Html.ActionLink("Delete", "DeleteMamber", new { email = item.User.Email, projectId = item.ProjectId })
+                </td>
+            </tr>
+        }
+    }
+</table>
+<br />
+<br />
+
+<a href="/Manager/ProjectDetails/@Model.ProjectId">Back</a>
+
+<script>
+    let visible = false;
+    let createProjectContainer = document.getElementsByClassName('add_container')[0];
+    document.getElementById('add_btn').addEventListener("click", function () {
+        if (!visible) {
+            createProjectContainer.style.display = "inline-block";
+            visible = true;
+        } else {
+            createProjectContainer.style.display = "none";
+            visible = false;
+        }
+    });
+</script>

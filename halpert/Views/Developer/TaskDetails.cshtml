@@ -1,0 +1,558 @@
+﻿@*@model halpert.ViewModels.DevTaskDetailsVM*@
+
+@model halpert.Models.Task
+@{
+    ViewBag.Title = "TaskDetails";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@Model.Name</h2>
+
+<style>
+    table, th, td {
+        padding: 10px;
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+</style>
+
+<div>
+    <h4>Task</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            Name
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+
+        <br />
+
+        <dt>
+            Details
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Details)
+        </dd>
+
+        <br />
+
+        <dt>
+            Duration
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Duration) <i>days</i>
+        </dd>
+
+        @*<br />
+
+        <dt>
+            Start Date
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.StartTime)
+        </dd>*@
+        <br />
+        <dt>
+            Accepted duration
+        </dt>
+
+        <dd>
+            @if (Model.Accepted == null)
+            {
+                <i>pending</i>
+            }
+            else
+            {
+                @Html.DisplayFor(model => model.Accepted)
+            }
+
+        </dd>
+
+        <br />
+        <dt>
+            Progress
+            @Html.DisplayFor(model => model.Progress)%
+
+        </dt>
+
+        <dd>
+            @if (Model.Accepted == null || Model.Accepted == false)
+            {
+                <i>you can't update progress until the duration accepted by the project manager</i>
+            }
+            else
+            {
+                using (Html.BeginForm("UpdateProgress", "Developer"))
+                {
+
+                    @Html.DropDownListFor(m => m.Progress,
+                        new List<SelectListItem>
+                        {
+                           new SelectListItem { Text = "0%", Value = "0"},
+                           new SelectListItem { Text = "25%", Value = "25"},
+                           new SelectListItem { Text = "50%", Value = "50"},
+                           new SelectListItem { Text = "75%", Value = "75"},
+                           new SelectListItem { Text = "100%", Value = "100"}
+
+                        })
+                    @Html.HiddenFor(m => m.Id)
+                    <input type="submit" value="update" class=" btn-default" />
+                }
+            }
+        </dd>
+        <br />
+
+        @if (Model.Accepted == null || Model.Accepted == false)
+        {
+            using (Html.BeginForm("UpdateDuration", "Developer"))
+            {
+                @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+                <dt>
+                    Optimistic time
+                </dt>
+                <dd>
+                    @Html.EditorFor(model => model.Optimistic, new { htmlAttributes = new { @class = "form-control", @id = "opti" } })
+                    @Html.ValidationMessageFor(model => model.Optimistic, "", new { @class = "text-danger" })
+                </dd>
+
+                <dt>
+                    MostLikely time
+                </dt>
+                <dd>
+                    @Html.EditorFor(model => model.MostLikely, new { htmlAttributes = new { @class = "form-control", @id = "mostlikely" } })
+                    @Html.ValidationMessageFor(model => model.MostLikely, "", new { @class = "text-danger" })
+                </dd>
+
+                <dt>
+                    Pessimistic time
+                </dt>
+                <dd>
+                    @Html.EditorFor(model => model.Pessimistic, new { htmlAttributes = new { @class = "form-control", @id = "pessi" } })
+                    @Html.ValidationMessageFor(model => model.Pessimistic, "", new { @class = "text-danger" })
+                </dd>
+
+                <dd>
+                    @Html.HiddenFor(t => t.Id)
+                    <br />
+                    <input type="submit" value="Update times" class="btn btn-default" id="update_btn" />
+                </dd>
+            }
+
+        }
+        @if (Model.Length == null)
+        {
+            <br />
+            <dt>
+                Sorce code
+            </dt>
+            <dd>
+                @Html.TextAreaFor(model => model.SorceCode, new
+                {
+                    @class = "form-control",
+                    @rows = "1",
+                    @id = "variables",
+               @style = "max-width:80% !important;",
+                    @placeholder = "if the sorce code have 'objects' write all 'variables' seperated by white space, otherwise leave it empty"
+                })
+            </dd>
+            <br />
+            <dd>
+                @Html.TextAreaFor(model => model.SorceCode, new { @class = "form-control", @rows = "15", @id = "textarea", @style = "max-width:80% !important;" })
+            </dd>
+            <br />
+            <dd>
+                <button id="btn" class="btn btn-default">Display Halstead results</button>
+            </dd>
+            <br />
+            <dd>
+                <table>
+                    <tr>
+                        <th>Length</th>
+                        <th>Vocabulary</th>
+                        <th>Volume</th>
+                        <th>Inside the boundaries</th>
+                        <th>Difficulty</th>
+                        <th>Effort</th>
+                        <th>Time to understand</th>
+                        <th>Bugs</th>
+                    </tr>
+                    <tr>
+                        <td id="length"></td>
+                        <td id="vocabulary"></td>
+                        <td id="volume"></td>
+                        <td id="insideboundaries"></td>
+                        <td id="difficulty"></td>
+                        <td id="effort"></td>
+                        <td id="timetounderstand"></td>
+                        <td id="bugs"></td>
+                    </tr>
+
+                </table>
+                <br />
+                <p id="operators"><strong>Operators: </strong></p>
+                <p id="operands"><strong>Operands: </strong></p>
+            </dd>
+            <br />
+            <dd id="confirm_haleasted_container">
+
+            </dd>
+        }
+        else
+        {
+            <br />
+            <dd>
+                <table>
+                    <tr>
+                        <th>Length</th>
+                        <th>Vocabulary</th>
+                        <th>Volume</th>
+                        <th>Inside the boundaries</th>
+                        <th>Difficulty</th>
+                        <th>Effort</th>
+                        <th>Time to understand</th>
+                        <th>Bugs</th>
+                    </tr>
+                    <tr>
+                        <td>@Model.Length</td>
+                        <td>@Model.Vocabulary</td>
+                        <td>@Model.Volume</td>
+                        <td>@Model.InsideTheBoundaries</td>
+                        <td>@Model.Difficulty</td>
+                        <td>@Model.Effort</td>
+                        <td>@Model.TimeToUnderStand</td>
+                        <td>@Model.Bugs</td>
+                    </tr>
+                </table>
+            </dd>
+            <br />
+            <dd>
+                @using (Html.BeginForm("DeleteHalsteadResults", "Developer"))
+                {
+                    @Html.HiddenFor(m => m.Id);
+                    <input type="submit" value="Delete" class="btn btn-danger" />
+                }
+            </dd>
+        }
+    </dl>
+</div>
+<br />
+<br />
+<p>
+    @Html.ActionLink("Back to List", "ProjectTasks", new { id = Model.ProjectId })
+</p>
+
+<script>
+    const JAVA_KEYWORDS = ["abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class", "const", "try", "while",
+    "continue", "default", "do", "double", "else", "extends", "false", "final", "finally", "float", "for", "goto", "if", "implements",
+    "import", "instanceof", "int", "interface", "long", "native", "new", "null", "package", "private", "protected", "public", "void",
+    "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient", "true", "volatile"];
+
+    // added the dot
+    const symbols_1 = [';','.', '*', '/', '%', '+', '-', '~', '!', '<', '>', '&', '^', '|', '?', ':', '=', ',', '(', ')', '{', '}', '[', ']'];
+    const symbols_2 = ['++', '--', '<=', '>=', '==', '!=', '&&', '||', '+=', '-=', '*=', '/=', '%=', '&=', '^=', '|=', '<<=', '>>=', '>>>='];
+
+
+    /**
+     * OPERATORS: symbols_1, symbols_2, Keywords
+     * OPERANDS : varables, numbers -> srtings??
+     */
+
+    let TOTAL_OPERATORS = 0;
+    let TOTAL_OPERANDS = 0;
+    let variables = [];
+    let unknownWords = [];
+
+    let UNIQUE_OPERATORS = [];
+    let UNIQUE_OPERANDS = [];
+    let flag = false;
+
+    document.getElementById("btn").onclick = function () {
+
+        variables = document.getElementById("variables").value.trim().split(' ');
+
+        let textarea = document.getElementById("textarea");
+
+        let words = textarea.value.trim().split(' ');
+
+        words.forEach(word => {
+            word = word.replace(/(\r\n|\n|\r|\t)/gm, " ");
+            calculate(word);
+        });
+
+        if(variables.length == 1){
+            console.log("should not");
+            if (unknownWords.length != 0) {
+                TOTAL_OPERANDS = TOTAL_OPERANDS + unknownWords.length;
+
+                for(let i = 0; i < unknownWords.length; i++){
+                    if(UNIQUE_OPERANDS.indexOf(unknownWords[i]) == -1){
+                        UNIQUE_OPERANDS.push(unknownWords[i]);
+                    }
+                }
+            }
+        } else {
+            console.log("should");
+            if (unknownWords.length != 0) {
+                TOTAL_OPERATORS = TOTAL_OPERATORS + unknownWords.length;
+                for(let i = 0; i < unknownWords.length; i++){
+                    if(UNIQUE_OPERATORS.indexOf(unknownWords[i]) == -1){
+                        UNIQUE_OPERATORS.push(unknownWords[i]);
+                    }
+                }
+            }
+        }
+
+        // temp code
+        console.log("N1 : " + TOTAL_OPERATORS);
+        console.log("N2 : " + TOTAL_OPERANDS);
+        console.log("n1 : " + UNIQUE_OPERATORS.length);
+        console.log("n2 : " + UNIQUE_OPERANDS.length);
+
+        let operators = "";
+        UNIQUE_OPERATORS.forEach(e => {
+            operators = operators + e + " ";
+        });
+        document.getElementById('operators').innerHTML = "<strong>Operators</strong>: " + operators;
+
+        let operands = "";
+        UNIQUE_OPERANDS.forEach(e => {
+            operands = operands + e + " ";
+        });
+        document.getElementById('operands').innerHTML = "<strong>Operands</strong>: " + operands;
+
+        displayAllUnits(TOTAL_OPERANDS, TOTAL_OPERATORS, UNIQUE_OPERANDS, UNIQUE_OPERATORS);
+
+        TOTAL_OPERANDS = 0;
+        TOTAL_OPERATORS = 0;
+        UNIQUE_OPERANDS.length = 0;
+        UNIQUE_OPERATORS.length = 0;
+        operators = "";
+        operands = "";
+        unknownWords.length = 0;
+    }
+
+    function calculate(word) {
+
+        if (word == '') {
+            return;
+        }
+
+        let symbols_2_Size = symbols_2.length;
+        for (let i = 0; i < symbols_2_Size; i++) {
+
+            if (word == symbols_2[i] || word == '&gt;' || word == '&lt;') {
+                TOTAL_OPERATORS++;
+                if (UNIQUE_OPERATORS.indexOf(word) == -1) {
+                    UNIQUE_OPERATORS.push(word)
+                }
+                return;
+            }
+        }
+
+        let symbols_1_Size = symbols_1.length;
+        for (let i = 0; i < symbols_1_Size; i++) {
+
+            if (word == symbols_1[i]) {
+
+                if (word == "[" || word == "]") {
+                    TOTAL_OPERATORS = TOTAL_OPERATORS + 0.5;
+                } else {
+                    TOTAL_OPERATORS++;
+                }
+
+                if(UNIQUE_OPERATORS.indexOf(word) == -1){
+                    UNIQUE_OPERATORS.push(word)
+                }
+
+                return;
+            }
+        }
+
+        let keywordsSize = JAVA_KEYWORDS.length;
+        for (let i = 0; i < keywordsSize; i++) {
+
+            if (word == JAVA_KEYWORDS[i]) {
+                TOTAL_OPERATORS++;
+                if(UNIQUE_OPERATORS.indexOf(word) == -1){
+                    UNIQUE_OPERATORS.push(word)
+                }
+                return;
+            }
+        }
+
+
+        let variablesSize = variables.length;
+        for (let i = 0; i < variablesSize; i++) {
+            if (word == variables[i]) {
+                TOTAL_OPERANDS++;
+                if(UNIQUE_OPERANDS.indexOf(word) == -1){
+                    UNIQUE_OPERANDS.push(word)
+                }
+                return;
+            }
+        }
+
+        if (hasSymbol(word)) {
+
+            let str = addSpace(word);
+            let words = str.split(' ');
+
+            let wordsSize = words.length;
+            for (let i = 0; i < wordsSize; i++) {
+                calculate(words[i]);
+            }
+            return;
+        }
+
+        if (word.includes("0") ||
+            word.includes("1") || word.includes("2") || word.includes("3") ||
+            word.includes("4") || word.includes("5") || word.includes("6") ||
+            word.includes("7") || word.includes("9") || word.includes("9")) {
+            TOTAL_OPERANDS++;
+            if(UNIQUE_OPERANDS.indexOf(word) == -1){
+                UNIQUE_OPERANDS.push(word)
+            }
+            return;
+        }
+
+        unknownWords[unknownWords.length] = word;
+    }
+
+    function addSpace(str) {
+
+        let pos = -1;
+        let chars = str.split('');
+
+        for (let i = 0; i < chars.length; i++) {
+            for (let j = 0; j < symbols_1.length; j++) {
+
+                if (chars[i] == symbols_1[j]) {
+
+                    pos = i;
+
+                    if (chars[i + 1] == '=' || chars[i + 1] == '+' || chars[i + 1] == '-') {
+
+                        pos = i;
+
+                        return str.substring(0, pos) + " " +
+                            str[pos] + str[pos + 1] + " " +
+                            str.substring(pos + 2, str.length);
+                    }
+
+                    return str.substring(0, pos) + " " +
+                        str[pos] + " " +
+                        str.substring(pos + 1, str.length);
+                }
+            }
+        }
+    }
+
+    function hasSymbol(word) {
+
+        word = word.trim();
+        let chars = word.split('');
+
+        for (let i = 0; i < chars.length; i++) {
+            for (let j = 0; j < symbols_1.length; j++) {
+
+                if (chars[i] == symbols_1[j]) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    function lengthOfProgram(totalOperands, totalOperators){
+        return totalOperands + totalOperators;
+    }
+
+    function vocabulary(uniqueOperands, uniqueOperators){
+        return uniqueOperands.length + uniqueOperators.length;
+    }
+
+    function volume(lengthOfProgram, vocabulary){
+        return lengthOfProgram * Math.log2(vocabulary);
+    }
+
+    function isInsideBoundaries(volume){
+        return volume >= 20 && volume <= 1000 ? true : false;
+    }
+
+    function difficulty(uniqueOperators, uniqueOperands, totalOperands){
+        return (uniqueOperators.length / 2) * (totalOperands / uniqueOperands.length);
+    }
+
+    function effort(volume, difficulty){
+        return volume * difficulty;
+    }
+
+    function timeToUnderstand(effort){
+        return effort / 18;
+    }
+
+    function bugs(effort){
+        return Math.pow(effort, (2/3)) / 3000;
+    }
+
+    // temp method
+    function displayAllUnits(totalOperands, totalOperators, uniqueOperands, uniqueOperators){
+        let N1 = totalOperators;
+        let N2 = totalOperands;
+        let n1 = uniqueOperators;
+        let n2 = uniqueOperands;
+
+        let len = lengthOfProgram(N1, N2) ;
+        document.getElementById('length').innerHTML = len;
+
+        let voc =  vocabulary(n1, n2) ;
+        document.getElementById('vocabulary').innerHTML = voc;
+
+        let vol = volume(len, voc) ;
+        document.getElementById('volume').innerHTML = vol;
+
+        document.getElementById('insideboundaries').innerHTML = isInsideBoundaries(vol);
+
+        let diff =  difficulty(n1, n2, N2) ;
+        document.getElementById('difficulty').innerHTML = diff;
+
+        let eff =  effort(vol, diff) ;
+        document.getElementById('effort').innerHTML = eff;
+
+        let time = timeToUnderstand(eff) ;
+        document.getElementById('timetounderstand').innerHTML = time + "sec";
+
+        let bgs =  bugs(eff) ;
+        document.getElementById('bugs').innerHTML = bgs;
+
+        let HalBtn = document.getElementById("new_node");
+        if (HalBtn == null) {
+            var node = document.createElement("a");
+            node.setAttribute("id", "new_node");
+            node.setAttribute("href", "/Developer/UpdateHalsteadResults/" +
+                @Model.Id + "/" + Math.round(len) + "/" + Math.round(voc) + "/" + Math.round(vol) + "/" + isInsideBoundaries(vol) + "/" + Math.round(diff) + "/" + Math.round(eff) + "/" + Math.round(time) + "/" + Math.round(bgs));
+            node.setAttribute("class", "btn btn-success");
+            var textnode = document.createTextNode("Confirm Halstead results");
+            node.appendChild(textnode);
+            document.getElementById("confirm_haleasted_container").appendChild(node);
+
+        } else {
+            HalBtn.remove();
+            var node = document.createElement("a");
+            node.setAttribute("id", "new_node");
+            node.setAttribute("href", "/Developer/UpdateHalsteadResults/" +
+                @Model.Id + "/" + Math.round(len) + "/" + Math.round(voc) + "/" + Math.round(vol) + "/" + isInsideBoundaries(vol) + "/" + Math.round(diff) + "/" + Math.round(eff) + "/" + Math.round(time) + "/" + Math.round(bgs));
+            node.setAttribute("class", "btn btn-success");
+            var textnode = document.createTextNode("Confirm Halstead results");
+            node.appendChild(textnode);
+            document.getElementById("confirm_haleasted_container").appendChild(node);
+        }
+    }
+
+</script>

@@ -1,0 +1,51 @@
+﻿@model halpert.ViewModels.RegisterVM
+
+<link href="~/Content/DeketeMeLoginStyle.css" rel="stylesheet" />
+<div class="wrapper fadeInDown">
+    <br /><br /><br />
+    <div id="formContent">
+        <!-- Tabs Titles -->
+        <h1>HALPERT</h1>
+        <br />
+        <!-- Login Form -->
+        <form action="/Accounts/Register" method="post">
+
+            @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @type = "text", @class = "fadeIn second", @placeholder = "name" } })
+            <br />
+            @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+
+            @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @type = "text", @class = "fadeIn second", @placeholder = "email" } })
+            <br />
+            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+
+            @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @type = "text", @class = "fadeIn third", @placeholder = "password" } })
+            <br />
+            @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+
+            @Html.EditorFor(model => model.ConfirmPassword, new { htmlAttributes = new { @type = "text", @class = "fadeIn third", @placeholder = "confirm password" } })
+            <br />
+            @Html.ValidationMessageFor(model => model.ConfirmPassword, "", new { @class = "text-danger" })
+
+            <br />
+            @* Value , Text, *@
+            @Html.DropDownListFor(m => m.RoleId, new SelectList(Model.Roles, "Id", "RoleName"),
+                "What is your position?", new { htmlAttributes = new { @class = "form-control" } })
+            <br />
+            @Html.ValidationMessageFor(model => model.RoleId, "", new { @class = "text-danger" })
+
+            <br />
+            <input type="submit" class="fadeIn fourth" value="Create">
+        </form>
+
+
+        <!-- new account -->
+        <div id="formFooter">
+            <a class="underlineHover" href="/Accounts/Login">Login</a>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

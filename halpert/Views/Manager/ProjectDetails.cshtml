@@ -1,0 +1,324 @@
+﻿@model halpert.ViewModels.ProjectDetailsVM
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .AcceptDeny {
+        padding: 2px;
+        border: 1px solid skyblue;
+    }
+
+        .AcceptDeny:nth-child(1):hover {
+            text-decoration: none;
+            background-color: aquamarine;
+        }
+
+        .AcceptDeny:nth-child(2):hover {
+            text-decoration: none;
+            color: red;
+        }
+    #container {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        height: 100%;
+        display: none;
+    }
+
+    #rect {
+        width: 200px;
+        height: 20px;
+        background-color: white;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        z-index: 1;
+    }
+</style>
+
+<h2>@Model.Project.Name</h2>
+
+<p>
+    @Html.ActionLink("Team members", "TeamMembers", new { id = Model.Project.Id })
+</p>
+<p>
+    @Html.ActionLink("Create new task", "CreateTask", new { id = Model.Project.Id })
+</p>
+
+<br />
+<br />
+<table class="table">
+
+    @if (Model.Tasks.Count == 0)
+    {
+        <i>This project doesn't have any task! </i>
+    }
+    else
+    {
+        <tr>
+            <th>
+                Task name
+            </th>
+            <th>
+                Assigned to
+            </th>
+
+            <th>
+                Duration
+            </th>
+            <th>
+                Progress
+            </th>
+            <th>
+                Accept duration
+            </th>
+            <th></th>
+        </tr>
+        foreach (var item in Model.Tasks)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.User.Email)
+                </td>
+
+                <td>
+                    @if (item.Duration == 1)
+                    {
+                        <i>1 day (default)</i>
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(modelItem => item.Duration) <i>days</i>
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Progress)%
+                </td>
+                <td>
+                    @if (item.Accepted == null)
+                    {
+                        <a class="AcceptDeny" href="/Manager/AcceptedDuration/@item.Id">Accept</a>
+                        <a class="AcceptDeny" href="/Manager/DeniedDuration/@item.Id">Deny</a>
+
+                    }
+                    else if (item.Accepted == true)
+                    {
+                        <i>Accepted </i>
+                    }
+                    else
+                    {
+                        <i>Denied</i>
+                    }
+
+                </td>
+                <td>
+                    @Html.ActionLink("Details", "TaskDetails", new { id = item.Id }) |
+                    @Html.ActionLink("Delete", "DeleteTask", new { id = item.Id }, new { @class = "text-danger" })
+                </td>
+            </tr>
+        }
+    }
+</table>
+
+<br />
+<br />
+<br />
+<br />
+<a href="/Manager/DeleteProject/@Model.Project.Id" class="btn btn-danger">Delete project</a>
+
+<br />
+<br />
+<br />
+<br />
+
+@* Google chart API (Gantt)*@
+<div id="chart_div"></div>
+
+<br />
+<br />
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+<script type="text/javascript">
+    google.charts.load('current', { 'packages': ['gantt'] });
+    google.charts.setOnLoadCallback(drawChart);
+
+    function daysToMilliseconds(days) {
+        return days * 24 * 60 * 60 * 1000;
+    }
+
+    function drawChart() {
+
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Task ID');
+        data.addColumn('string', 'Task Name');
+        data.addColumn('date', 'Start Date');
+        data.addColumn('date', 'End Date');
+        data.addColumn('number', 'Duration');
+        data.addColumn('number', 'Percent Complete');
+        data.addColumn('string', 'Dependencies');
+
+        var ids = "@Model.Ids".split("-!*");
+        var names = "@Model.Names".split("-!*");
+        var durations = "@Model.Durations".split("-!*");
+        var progresses = "@Model.Progresses".split("-!*");
+        var predecessors = "@Model.Predecessors".split("-!*");
+        var dates = "@Model.Dates".split("-!*");
+
+        var numOfTasks = @Model.NumOfTasks;
+
+        var tasks = [];
+        var task;
+        var len = ids.length - 1;
+
+        for (let i = 0; i < len; i++) {
+            task = [];
+            task.push(ids[i]);
+            task.push(names[i]);
+
+            if (dates[i] == "")
+                task.push(null);
+            else
+                task.push(new Date(dates[i]));
+
+            task.push(null);
+            task.push(daysToMilliseconds(parseInt(durations[i])));
+            task.push( parseInt( progresses[i] ));
+            task.push(predecessors[i]);
+            tasks.push(task);
+        }
+
+        if (numOfTasks != 0) {
+
+            data.addRows(tasks);
+
+            var options = {
+                height:500,
+                gantt: {
+                    criticalPathEnabled: false
+                }
+            };
+
+            var chart = new google.visualization.Gantt(document.getElementById('chart_div'));
+
+            chart.draw(data, options);
+        }
+    }
+</script>
+
+
+@* AnyChart API (Pert) *@
+<div id="container">
+    <div id="rect"></div>
+</div>
+
+@* PERT chart btn *@
+<button id="pert_btn" class="btn btn-default">Display PERT chart</button>
+<br />
+<br />
+<script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-core.min.js" type="text/javascript"></script>
+<script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-pert.min.js" type="text/javascript"></script>
+
+<script>
+    anychart.onDocumentReady(function () {
+        var ids = "@Model.Ids".split("-!*");
+        var names = "@Model.Names".split("-!*");
+        var durations = "@Model.Durations".split("-!*");
+        var init_predecessors = "@Model.Predecessors".split("-!*");
+
+        var predecessors = [];
+        for (let i = 0; i < init_predecessors.length; i++) {
+            var pre = [];
+            // if init_predecessors[i] has more than one comma
+            if (init_predecessors[i].includes(",")) {
+                pre = init_predecessors[i].split(",");
+                predecessors.push(pre);
+            } else {
+                predecessors.push(pre);
+            }
+
+        }
+
+        var len = ids.length - 1;
+        var data = [];
+
+        for (let i = 0; i < len; i++) {
+            if (predecessors[i].length == 0) {
+                var datum = {
+                    id: ids[i],
+                    duration: durations[i],
+                    name: names[i]
+                }
+            } else {
+                var datum = {
+                    id: ids[i],
+                    duration: durations[i],
+                    name: names[i],
+                    dependsOn: predecessors[i]
+                }
+            }
+
+            data.push(datum);
+        }
+        console.log(data);
+
+        // create a PERT chart
+        chart = anychart.pert();
+
+        // set chart data
+        chart.data(data, "asTable");
+
+        // design milestones
+        chart.milestones().labels().fontSize(10);
+        chart.milestones().shape("circle");
+        chart.milestones().size(30);
+
+        // set the title of the chart
+        chart.title("PERT Chart");
+        var duration = chart.getStat("pertChartProjectDuration");
+
+        // set critical path milestones colors
+        milestones = chart.criticalPath().milestones();
+        milestones.fill("#ffab91");
+        milestones.hovered().fill("#ff6e40");
+        milestones.selected().fill("#ff6e40");
+        milestones.labels().fontColor("#86614e");
+
+        // set critical tasks stroke
+        tasks = chart.criticalPath().tasks();
+        tasks.stroke("#ffab91");
+
+        // set the chart title to show the duration
+        chart.title("The duration equals " + duration);
+
+        // set the container id for the chart
+        chart.container("container");
+
+        // design tasks
+        chart.tasks().upperLabels().padding(5);
+        chart.tasks().upperLabels().fontSize(20);
+
+        // initiate drawing the chart
+        chart.draw();
+    });
+
+</script>
+<script>
+    var PERTContainer = document.getElementById("container");
+    var shown = false;
+    document.getElementById("pert_btn").addEventListener("click", function () {
+        if (shown) {
+            PERTContainer.style.display = "none";
+            shown = false;
+        } else {
+            PERTContainer.style.display = "block";
+            shown = true;
+        }
+    });
+</script>

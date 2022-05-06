@@ -1,0 +1,53 @@
+﻿@model halpert.ViewModels.DeveloperProjectDetails
+
+@{
+    ViewBag.Title = "ProjectDetails";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<br />
+<h2>@Model.ProjectName</h2>
+<h5>Tasks assigned to me</h5>
+<br />
+<table class="table">
+    <tr>
+        <th>Task name</th>
+        <th>Progress</th>
+        <th>Duration</th>
+        <th>Accepted duration</th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model.Tasks)
+    {
+        <tr>
+            <td>
+                @item.Name
+            </td>
+            <td>
+                @item.Progress%
+            </td>
+            <td>
+                @item.Duration <i>days</i>
+            </td>
+            <td>
+                @if (item.Accepted == null)
+                {
+                    <i>pending</i>
+                }
+                else if (item.Accepted == true)
+                {
+                    <i>Accepted</i>
+                }
+                else
+                {
+                    <i>Denied</i>
+                }
+
+            </td>
+            <td>
+                @Html.ActionLink("Details", "TaskDetails", new { id = item.Id }) |
+            </td>
+        </tr>
+    }
+
+</table>

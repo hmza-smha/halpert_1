@@ -1,0 +1,69 @@
+﻿@model halpert.ViewModels.ManagerIndexVM
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .create_container {
+        border: 1px solid black;
+        display: none;
+        padding: 5px 20px;
+    }
+</style>
+<br />
+<br />
+<h2>My Projects</h2>
+
+<br />
+<table class="table">
+    <tr>
+    </tr>
+    @if (Model.Projects.Count == 0)
+    {
+        <i>You don't have any project!</i>
+    }
+    else
+    {
+        foreach (var item in Model.Projects)
+        {
+            <tr>
+                <td>
+                    <span class="lead text-info">@item.Name</span>
+                </td>
+                <td>
+                    <a href="/Manager/ProjectDetails/@item.Id">Details</a>
+                </td>
+            </tr>
+        }
+    }
+
+</table>
+
+<button id="create_btn" class="btn btn-success">Create project</button>
+
+@using (Html.BeginForm("CreateProject", "Manager"))
+{
+    <div class="create_container">
+        <h5>Project name</h5>
+        @Html.EditorFor(model => model.NewProjectName, new { htmlAttributes = new { @class = "" } })
+        @Html.ValidationMessageFor(model => model.NewProjectName, "", new { @class = "text-danger" })
+        <input type="submit" value="Create" class="" />
+    </div>
+}
+
+
+<script>
+    let visible = false;
+    let createProjectContainer = document.getElementsByClassName('create_container')[0];
+    document.getElementById('create_btn').addEventListener("click", function () {
+        if (!visible) {
+            createProjectContainer.style.display = "inline-block";
+            visible = true;
+        } else {
+            createProjectContainer.style.display = "none";
+            visible = false;
+        }
+    });
+</script>
